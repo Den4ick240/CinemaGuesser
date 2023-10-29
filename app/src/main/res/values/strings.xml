@@ -1,3 +1,32 @@
 <resources>
     <string name="app_name">CinemaGuesser</string>
+    <string name="login">Вход</string>
+    <string name="registration">Регистрация</string>
+    <string name="password_recovery">Восстановление пароля</string>
+    <string name="app_title">CinemaGuesser</string>
+    <string name="password">Пароль</string>
+    <string name="repeat_password">Повторите пароль</string>
+    <string name="email">Email</string>
+    <string name="login_action">Войти</string>
+    <string name="registration_action">Зарегистрироваться</string>
+    <string name="username_not_found">Имя пользователя не найдено</string>
+    <string name="password_incorrect">Не правильный пароль</string>
+    <string name="connection_error">Ошибка соединения, провертье подключение к интернету</string>
+    <string name="unexpected_error">Неожиданная ошибка, попробуйте позже</string>
+    <string name="username">Логин</string>
+    <string name="invalid_username">Логин может содержать только буквы латинского алфавита, цифры (0–9) и спецсимволы @,!~-+*.</string>
+    <string name="invalid_password">Пароль может содержать только буквы латинского алфавита, цифры (0–9) и спецсимволы ,./?\'";:=[]{}!~-+*@</string>
+    <string name="invalid_email">Электронная почта не соответствует общепринятому формату</string>
+    <string name="passwords_dont_match">Пароли не совпадают</string>
+    <string name="username_exists">Пользователь с данным логином уже существует</string>
+    <string name="email_exists">Пользователь с данной электронной почтой уже существует</string>
+    <string name="forgot_password">Восстановить пароль</string>
+    <string name="send_code">Отправить код</string>
+    <string name="resend_code">Переотправить код</string>
+    <string name="seconds_left">%1d секунд до переотправки</string>
+    <string name="code_label">Код</string>
+    <string name="verify">Подтвердить</string>
+    <string name="wrong_code">Неверный код</string>
+    <string name="new_password">Смена пароля</string>
+    <string name="new_password_label">Новый пароль</string>
 </resources>
