@@ -14,10 +14,12 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.ElevatedButton
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
@@ -44,22 +46,26 @@ private fun TopBar(navController: NavController) {
             .padding(4.dp),
         horizontalArrangement = Arrangement.spacedBy(4.dp)
     ) {
-        Button(onClick = {}) {
+        Icon(painter = painterResource(id = R.drawable.icon_dark), contentDescription = null)
+        Button(onClick = {}, contentPadding = ButtonDefaults.TextButtonContentPadding) {
             Text(
                 text = stringResource(R.string.new_game_btn),
                 style = MaterialTheme.typography.bodySmall
             )
         }
         Spacer(modifier = Modifier.weight(1f))
-        ElevatedButton(onClick = {}) {
+        ElevatedButton(onClick = {}, contentPadding = ButtonDefaults.TextButtonContentPadding) {
             Text(
                 text = stringResource(R.string.rules_btn),
                 style = MaterialTheme.typography.bodySmall
             )
         }
-        ElevatedButton(onClick = {
-            navController.navigate(Screen.Authorized.Profile.route)
-        }) {
+        ElevatedButton(
+            onClick = {
+                navController.navigate(Screen.Authorized.Profile.route)
+            },
+            contentPadding = ButtonDefaults.TextButtonContentPadding
+        ) {
             Text(
                 text = stringResource(R.string.account_btn),
                 style = MaterialTheme.typography.bodySmall
