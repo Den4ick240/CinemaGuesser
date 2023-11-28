@@ -1,7 +1,6 @@
 plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
-//    kotlin("plugin.serialization") version "1.8.+"
     id("kotlinx-serialization")
 }
 
@@ -13,8 +12,8 @@ android {
         applicationId = "ru.nsu.ccfit.cinemaguesser"
         minSdk = 24
         targetSdk = 34
-        versionCode = 1
-        versionName = "1.0"
+        versionCode = 2
+        versionName = "1.1"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {

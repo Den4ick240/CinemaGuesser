@@ -26,6 +26,7 @@ import org.koin.androidx.viewmodel.dsl.viewModelOf
 import org.koin.core.module.dsl.factoryOf
 import org.koin.core.module.dsl.singleOf
 import org.koin.dsl.module
+import ru.nsu.ccfit.cinemaguesser.ui.authorized.ProfileViewModel
 import ru.nsu.ccfit.cinemaguesser.ui.unauthorized.LoginViewModel
 import ru.nsu.ccfit.cinemaguesser.ui.unauthorized.NewPasswordViewModel
 import ru.nsu.ccfit.cinemaguesser.ui.unauthorized.PasswordRecoveryViewModel
@@ -47,6 +48,7 @@ val appModule = module {
     viewModelOf(::RegisterViewModel)
     viewModelOf(::PasswordRecoveryViewModel)
     viewModelOf(::NewPasswordViewModel)
+    viewModelOf(::ProfileViewModel)
 
     factory {
         val tokenStore = get<TokenStore>()

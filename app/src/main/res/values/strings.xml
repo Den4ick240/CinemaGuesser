@@ -30,4 +30,10 @@
     <string name="wrong_code">Неверный код</string>
     <string name="new_password">Смена пароля</string>
     <string name="new_password_label">Новый пароль</string>
+    <string name="new_game_btn">Новая игра</string>
+    <string name="rules_btn">Правила</string>
+    <string name="account_btn">Профиль</string>
+    <string name="instructions">Чтобы начать игру, нажмите на кнопку "Новая игра" и следуйте дальнейшим инструкциям.</string>
+    <string name="greetings">Добро пожаловать в Cinema Guesser!</string>
+    <string name="log_out_btn">Выйти</string>
 </resources>

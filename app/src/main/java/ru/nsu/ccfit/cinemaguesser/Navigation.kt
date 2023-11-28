@@ -9,6 +9,8 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import org.koin.androidx.compose.koinViewModel
+import ru.nsu.ccfit.cinemaguesser.ui.authorized.MainScreen
+import ru.nsu.ccfit.cinemaguesser.ui.authorized.ProfileScreen
 import ru.nsu.ccfit.cinemaguesser.ui.unauthorized.LoginScreen
 import ru.nsu.ccfit.cinemaguesser.ui.unauthorized.NewPasswordScreen
 import ru.nsu.ccfit.cinemaguesser.ui.unauthorized.PasswordRecoveryScreen
@@ -34,9 +36,10 @@ fun Navigation() {
         startDestination = (if (isAuthorized) Screen.Authorized else Screen.Unauthorized).route
     ) {
         composable(Screen.Authorized.route) {
-            Button(onClick = { viewModel.logOut() }) {
-                Text(text = "Log out")
-            }
+            MainScreen(navController)
+        }
+        composable(Screen.Authorized.Profile.route) {
+            ProfileScreen(koinViewModel())
         }
         composable(Screen.Unauthorized.route) {
             UnauthorizedScreen(navController)
