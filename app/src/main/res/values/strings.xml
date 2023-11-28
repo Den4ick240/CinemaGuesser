@@ -16,6 +16,7 @@
     <string name="username">Логин</string>
     <string name="invalid_username">Логин может содержать только буквы латинского алфавита, цифры (0–9) и спецсимволы @,!~-+*.</string>
     <string name="invalid_password">Пароль может содержать только буквы латинского алфавита, цифры (0–9) и спецсимволы ,./?\'";:=[]{}!~-+*@</string>
+    <string name="username_or_password_incorrect">Ошибка авторизации. Проверьте правильонсть ввода данных.</string>
     <string name="invalid_email">Электронная почта не соответствует общепринятому формату</string>
     <string name="passwords_dont_match">Пароли не совпадают</string>
     <string name="username_exists">Пользователь с данным логином уже существует</string>

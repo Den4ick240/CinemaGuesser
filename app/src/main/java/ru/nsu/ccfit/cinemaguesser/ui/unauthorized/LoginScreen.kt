@@ -10,7 +10,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonColors
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -37,14 +36,17 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.ViewModel
 import androidx.navigation.NavController
-import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
 import ru.nsu.ccfit.cinemaguesser.AccountManager
 import ru.nsu.ccfit.cinemaguesser.LoginResult
-import ru.nsu.ccfit.cinemaguesser.LoginResult.*
+import ru.nsu.ccfit.cinemaguesser.LoginResult.NoInternet
+import ru.nsu.ccfit.cinemaguesser.LoginResult.OtherError
+import ru.nsu.ccfit.cinemaguesser.LoginResult.PasswordIncorrect
+import ru.nsu.ccfit.cinemaguesser.LoginResult.Success
+import ru.nsu.ccfit.cinemaguesser.LoginResult.UsernameNotFound
+import ru.nsu.ccfit.cinemaguesser.LoginResult.UsernameNotFoundOrPasswordIncorrect
 import ru.nsu.ccfit.cinemaguesser.R
 import ru.nsu.ccfit.cinemaguesser.Screen
-import ru.nsu.ccfit.cinemaguesser.navigate
 import ru.nsu.ccfit.cinemaguesser.ui.AppTitle
 import ru.nsu.ccfit.cinemaguesser.ui.isValidPassword
 import ru.nsu.ccfit.cinemaguesser.ui.isValidUsername
@@ -82,8 +84,15 @@ fun LoginScreen(navController: NavController, viewModel: LoginViewModel) {
         val focusManager = LocalFocusManager.current
         val showPassword = remember { mutableStateOf(false) }
         val passwordFocusRequester = remember { FocusRequester() }
+        val usernameOrPasswordIncorrect =
+            stringResource(id = R.string.username_or_password_incorrect)
+
         fun onLoginError(loginResult: LoginResult) {
+            usernameError = null
+            passwordError = null
+            generalError = null
             when (loginResult) {
+                UsernameNotFoundOrPasswordIncorrect -> usernameError = usernameOrPasswordIncorrect
                 UsernameNotFound -> usernameError = usernameNotFound
                 PasswordIncorrect -> passwordError = passwordIncorrect
                 NoInternet -> generalError = noInternet
@@ -104,7 +113,8 @@ fun LoginScreen(navController: NavController, viewModel: LoginViewModel) {
             value = username,
             onValueChange = {
                 usernameError = null
-                username = it },
+                username = it
+            },
             label = { Text(stringResource(R.string.username)) },
             singleLine = true,
             keyboardActions = KeyboardActions(onDone = { passwordFocusRequester.requestFocus() }),
@@ -127,7 +137,8 @@ fun LoginScreen(navController: NavController, viewModel: LoginViewModel) {
             value = password,
             onValueChange = {
                 passwordError = null
-                password = it },
+                password = it
+            },
             label = { Text(stringResource(R.string.password)) },
             singleLine = true,
             keyboardOptions = KeyboardOptions.Default.copy(
