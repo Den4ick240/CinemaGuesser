@@ -40,157 +40,134 @@ import ru.nsu.ccfit.cinemaguesser.AccountManager
 import ru.nsu.ccfit.cinemaguesser.ChangePasswordResult
 import ru.nsu.ccfit.cinemaguesser.R
 import ru.nsu.ccfit.cinemaguesser.Screen
-import ru.nsu.ccfit.cinemaguesser.VerifyResult
 import ru.nsu.ccfit.cinemaguesser.ui.AppTitle
-import ru.nsu.ccfit.cinemaguesser.ui.isValidEmail
 import ru.nsu.ccfit.cinemaguesser.ui.isValidPassword
-import ru.nsu.ccfit.cinemaguesser.ui.isValidUsername
 
 class NewPasswordViewModel(
     private val accountManager: AccountManager,
 ) : ViewModel() {
-    suspend fun changePassword(password: String): ChangePasswordResult {
-        return accountManager.changePassword(password)
-    }
+  suspend fun changePassword(password: String): ChangePasswordResult {
+    return accountManager.changePassword(password)
+  }
 }
 
 @Composable
-fun NewPasswordScreen(navController: NavController, viewModel: NewPasswordViewModel) {
-    Column(
-        modifier = Modifier.padding(16.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.spacedBy(16.dp, Alignment.CenterVertically)
-    ) {
-        Text(
-            text = stringResource(R.string.new_password),
-            style = MaterialTheme.typography.titleMedium
-        )
-        AppTitle()
+fun NewPasswordScreen(
+    navController: NavController,
+    viewModel: NewPasswordViewModel,
+) {
+  Column(
+      modifier = Modifier.padding(16.dp),
+      horizontalAlignment = Alignment.CenterHorizontally,
+      verticalArrangement = Arrangement.spacedBy(16.dp, Alignment.CenterVertically),
+  ) {
+    Text(text = stringResource(R.string.new_password), style = MaterialTheme.typography.titleMedium)
+    AppTitle()
 
-        var generalError by remember { mutableStateOf<String?>(null) }
-        generalError?.let {
-            Text(text = it, color = MaterialTheme.colorScheme.error)
-        }
-        val passwordFocusRequester = remember { FocusRequester() }
-        val secondPasswordFocusRequester = remember { FocusRequester() }
-        var passwordError by remember { mutableStateOf<String?>(null) }
-        var password by remember { mutableStateOf(TextFieldValue()) }
-        var secondPasswordError by remember { mutableStateOf<String?>(null) }
-        var secondPassword by remember { mutableStateOf(TextFieldValue()) }
-        var loading by remember { mutableStateOf<Boolean>(false) }
-        val focusManager = LocalFocusManager.current
-        val showPassword = remember { mutableStateOf(false) }
+    var generalError by remember { mutableStateOf<String?>(null) }
+    generalError?.let { Text(text = it, color = MaterialTheme.colorScheme.error) }
+    val passwordFocusRequester = remember { FocusRequester() }
+    val secondPasswordFocusRequester = remember { FocusRequester() }
+    var passwordError by remember { mutableStateOf<String?>(null) }
+    var password by remember { mutableStateOf(TextFieldValue()) }
+    var secondPasswordError by remember { mutableStateOf<String?>(null) }
+    var secondPassword by remember { mutableStateOf(TextFieldValue()) }
+    var loading by remember { mutableStateOf<Boolean>(false) }
+    val focusManager = LocalFocusManager.current
+    val showPassword = remember { mutableStateOf(false) }
 
-        OutlinedTextField(
-            modifier = Modifier
-                .fillMaxWidth()
-                .focusRequester(passwordFocusRequester),
-            value = password,
-            onValueChange = {
-                passwordError = null
-                password = it
-            },
-            label = { Text(stringResource(R.string.password)) },
-            singleLine = true,
-            keyboardOptions = KeyboardOptions.Default.copy(
-                autoCorrect = true,
-                keyboardType = KeyboardType.Text,
-                imeAction = ImeAction.Done
-            ),
-            keyboardActions = KeyboardActions(onDone = { secondPasswordFocusRequester.requestFocus() }),
-            visualTransformation = if (showPassword.value) VisualTransformation.None else PasswordVisualTransformation(),
-            trailingIcon = {
-                val icon =
-                    if (showPassword.value) Icons.Filled.Visibility else Icons.Filled.VisibilityOff
+    OutlinedTextField(
+        modifier = Modifier.fillMaxWidth().focusRequester(passwordFocusRequester),
+        value = password,
+        onValueChange = {
+          passwordError = null
+          password = it
+        },
+        label = { Text(stringResource(R.string.password)) },
+        singleLine = true,
+        keyboardOptions =
+            KeyboardOptions.Default.copy(
+                autoCorrect = true, keyboardType = KeyboardType.Text, imeAction = ImeAction.Done),
+        keyboardActions = KeyboardActions(onDone = { secondPasswordFocusRequester.requestFocus() }),
+        visualTransformation =
+            if (showPassword.value) VisualTransformation.None else PasswordVisualTransformation(),
+        trailingIcon = {
+          val icon = if (showPassword.value) Icons.Filled.Visibility else Icons.Filled.VisibilityOff
 
-                IconButton(onClick = { showPassword.value = !showPassword.value }) {
-                    Icon(
-                        icon,
-                        contentDescription = "Visibility",
-                        tint = MaterialTheme.colorScheme.primary
-                    )
-                }
-            },
-            isError = passwordError != null,
-            supportingText = {
-                passwordError?.let {
-                    Text(
-                        modifier = Modifier.fillMaxWidth(),
-                        text = it,
-                        color = MaterialTheme.colorScheme.error
-                    )
-                }
-            },
-        )
-        OutlinedTextField(
-            modifier = Modifier
-                .fillMaxWidth()
-                .focusRequester(secondPasswordFocusRequester),
-            value = secondPassword,
-            onValueChange = {
-                secondPasswordError = null
-                secondPassword = it
-            },
-            label = { Text(stringResource(R.string.repeat_password)) },
-            singleLine = true,
-            keyboardOptions = KeyboardOptions.Default.copy(
-                autoCorrect = true,
-                keyboardType = KeyboardType.Text,
-                imeAction = ImeAction.Done
-            ),
-            keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
-            visualTransformation = if (showPassword.value) VisualTransformation.None else PasswordVisualTransformation(),
-            trailingIcon = {
-                val icon =
-                    if (showPassword.value) Icons.Filled.Visibility else Icons.Filled.VisibilityOff
+          IconButton(onClick = { showPassword.value = !showPassword.value }) {
+            Icon(icon, contentDescription = "Visibility", tint = MaterialTheme.colorScheme.primary)
+          }
+        },
+        isError = passwordError != null,
+        supportingText = {
+          passwordError?.let {
+            Text(
+                modifier = Modifier.fillMaxWidth(),
+                text = it,
+                color = MaterialTheme.colorScheme.error)
+          }
+        },
+    )
+    OutlinedTextField(
+        modifier = Modifier.fillMaxWidth().focusRequester(secondPasswordFocusRequester),
+        value = secondPassword,
+        onValueChange = {
+          secondPasswordError = null
+          secondPassword = it
+        },
+        label = { Text(stringResource(R.string.repeat_password)) },
+        singleLine = true,
+        keyboardOptions =
+            KeyboardOptions.Default.copy(
+                autoCorrect = true, keyboardType = KeyboardType.Text, imeAction = ImeAction.Done),
+        keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
+        visualTransformation =
+            if (showPassword.value) VisualTransformation.None else PasswordVisualTransformation(),
+        trailingIcon = {
+          val icon = if (showPassword.value) Icons.Filled.Visibility else Icons.Filled.VisibilityOff
 
-                IconButton(onClick = { showPassword.value = !showPassword.value }) {
-                    Icon(
-                        icon,
-                        contentDescription = "Visibility",
-                        tint = MaterialTheme.colorScheme.primary
-                    )
-                }
-            },
-            isError = secondPasswordError != null,
-            supportingText = {
-                secondPasswordError?.let {
-                    Text(
-                        modifier = Modifier.fillMaxWidth(),
-                        text = it,
-                        color = MaterialTheme.colorScheme.error
-                    )
-                }
-            },
-        )
-        val noInternet = stringResource(R.string.connection_error)
-        val other = stringResource(R.string.unexpected_error)
-        val passwordsDontMatch = stringResource(id = R.string.passwords_dont_match)
-        val invalidPassword = stringResource(R.string.invalid_password)
-        val coroutineScope = rememberCoroutineScope()
+          IconButton(onClick = { showPassword.value = !showPassword.value }) {
+            Icon(icon, contentDescription = "Visibility", tint = MaterialTheme.colorScheme.primary)
+          }
+        },
+        isError = secondPasswordError != null,
+        supportingText = {
+          secondPasswordError?.let {
+            Text(
+                modifier = Modifier.fillMaxWidth(),
+                text = it,
+                color = MaterialTheme.colorScheme.error)
+          }
+        },
+    )
+    val noInternet = stringResource(R.string.connection_error)
+    val other = stringResource(R.string.unexpected_error)
+    val passwordsDontMatch = stringResource(id = R.string.passwords_dont_match)
+    val invalidPassword = stringResource(R.string.invalid_password)
+    val coroutineScope = rememberCoroutineScope()
 
-        fun onRes(res: ChangePasswordResult) {
-            when (res) {
-                ChangePasswordResult.Success ->
-                    navController.navigate(Screen.Unauthorized.Login.route) {
-                        popUpTo(Screen.Unauthorized.route) { inclusive = true }
-                    }
-
-                ChangePasswordResult.NoInternet -> generalError = noInternet
-                ChangePasswordResult.OtherError -> generalError = other
+    fun onRes(res: ChangePasswordResult) {
+      when (res) {
+        ChangePasswordResult.Success ->
+            navController.navigate(Screen.Unauthorized.Login.route) {
+              popUpTo(Screen.Unauthorized.route) { inclusive = true }
             }
-        }
-        Button(onClick = {
-            if (!isValidPassword(password.text)) passwordError = invalidPassword
-            else if (password.text != secondPassword.text) secondPasswordError = passwordsDontMatch
-            else coroutineScope.launch {
-                loading = true
-                viewModel.changePassword(password.text)
-                    .let(::onRes)
-                loading = false
-            }
-        }) {
-            Text(text = stringResource(R.string.registration_action))
-        }
+        ChangePasswordResult.NoInternet -> generalError = noInternet
+        ChangePasswordResult.OtherError -> generalError = other
+      }
     }
+    Button(
+        onClick = {
+          if (!isValidPassword(password.text)) passwordError = invalidPassword
+          else if (password.text != secondPassword.text) secondPasswordError = passwordsDontMatch
+          else
+              coroutineScope.launch {
+                loading = true
+                viewModel.changePassword(password.text).let(::onRes)
+                loading = false
+              }
+        }) {
+          Text(text = stringResource(R.string.registration_action))
+        }
+  }
 }

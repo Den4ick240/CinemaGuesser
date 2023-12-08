@@ -7,12 +7,12 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.distinctUntilChanged
 
 class ValueFlow<T>(private val flow: Flow<T>, private val getValue: () -> T) : Flow<T> by flow {
-    val value get() = getValue()
+  val value
+    get() = getValue()
 }
 
 fun <T> StateFlow<T>.asValueFlow() = ValueFlow(this) { value }
 
-@Composable
-fun <T> ValueFlow<T>.collectValueAsState() = this.collectAsState(initial = value)
+@Composable fun <T> ValueFlow<T>.collectValueAsState() = this.collectAsState(initial = value)
 
 fun <T> ValueFlow<T>.distinctUntilChangedValue() = ValueFlow(distinctUntilChanged()) { value }

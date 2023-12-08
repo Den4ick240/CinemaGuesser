@@ -86,7 +86,10 @@ val appModule = module {
 }
 
 fun getSharedPrefs(androidApplication: Application): SharedPreferences {
-  return androidApplication.getSharedPreferences("default", android.content.Context.MODE_PRIVATE)
+  return androidApplication.getSharedPreferences(
+      "default",
+      android.content.Context.MODE_PRIVATE,
+  )
 }
 
 private val TokenStore.bearerTokens

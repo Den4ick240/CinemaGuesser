@@ -21,30 +21,28 @@ import ru.nsu.ccfit.cinemaguesser.asValueFlow
 import ru.nsu.ccfit.cinemaguesser.collectValueAsState
 
 class ProfileViewModel(private val accountManager: AccountManager) : ViewModel() {
-    private val _loading = MutableStateFlow(false)
-    val loading: ValueFlow<Boolean> = _loading.asValueFlow()
+  private val _loading = MutableStateFlow(false)
+  val loading: ValueFlow<Boolean> = _loading.asValueFlow()
 
-    fun logout() {
-        viewModelScope.launch {
-            _loading.value = true
-            accountManager.logOut()
-            _loading.value = false
-        }
+  fun logout() {
+    viewModelScope.launch {
+      _loading.value = true
+      accountManager.logOut()
+      _loading.value = false
     }
+  }
 }
 
 @Composable
 fun ProfileScreen(viewModel: ProfileViewModel) {
-    Column(
-        modifier = Modifier.padding(16.dp)
+  Column(modifier = Modifier.padding(16.dp)) {
+    val loading by viewModel.loading.collectValueAsState()
+    Button(
+        modifier = Modifier.fillMaxWidth(),
+        onClick = { viewModel.logout() },
+        enabled = !loading,
     ) {
-        val loading by viewModel.loading.collectValueAsState()
-        Button(
-            modifier = Modifier.fillMaxWidth(),
-            onClick = { viewModel.logout() },
-            enabled = !loading
-        ) {
-            Text(text = stringResource(R.string.log_out_btn))
-        }
+      Text(text = stringResource(R.string.log_out_btn))
     }
+  }
 }

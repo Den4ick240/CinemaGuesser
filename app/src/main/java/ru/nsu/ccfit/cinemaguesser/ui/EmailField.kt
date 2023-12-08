@@ -16,31 +16,30 @@ fun EmailTextField(
     onEmailChange: (TextFieldValue) -> Unit,
     errorText: String?
 ) {
-    OutlinedTextField(
-        modifier = Modifier
-            .fillMaxWidth(),
-        value = email,
-        onValueChange = { onEmailChange(it) },
-        label = { Text("Email") },
-        singleLine = true,
-        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
-        isError = errorText != null,
-        supportingText = {
-            errorText?.let {
-                Text(
-                    modifier = Modifier.fillMaxWidth(),
-                    text = errorText,
-                    color = MaterialTheme.colorScheme.error
-                )
-            }
-        },
-    )
+  OutlinedTextField(
+      modifier = Modifier.fillMaxWidth(),
+      value = email,
+      onValueChange = { onEmailChange(it) },
+      label = { Text("Email") },
+      singleLine = true,
+      keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
+      isError = errorText != null,
+      supportingText = {
+        errorText?.let {
+          Text(
+              modifier = Modifier.fillMaxWidth(),
+              text = errorText,
+              color = MaterialTheme.colorScheme.error)
+        }
+      },
+  )
 }
 
 fun isValidEmail(email: String): Boolean {
-    val emailRegex = "[a-zA-Z0-9._-]+@[a-z]+\\.+[a-z]+".toRegex()
-    return email.matches(emailRegex)
+  val emailRegex = "[a-zA-Z0-9._-]+@[a-z]+\\.+[a-z]+".toRegex()
+  return email.matches(emailRegex)
 }
 
-fun isValidPassword(password: String) : Boolean = password.isNotBlank()
-fun isValidUsername(username: String) : Boolean = username.isNotBlank()
+fun isValidPassword(password: String): Boolean = password.isNotBlank()
+
+fun isValidUsername(username: String): Boolean = username.isNotBlank()

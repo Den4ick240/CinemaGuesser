@@ -1,7 +1,5 @@
 package ru.nsu.ccfit.cinemaguesser
 
-import androidx.compose.material3.Button
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.lifecycle.ViewModel
@@ -17,44 +15,36 @@ import ru.nsu.ccfit.cinemaguesser.ui.unauthorized.PasswordRecoveryScreen
 import ru.nsu.ccfit.cinemaguesser.ui.unauthorized.RegistrationScreen
 import ru.nsu.ccfit.cinemaguesser.ui.unauthorized.UnauthorizedScreen
 
-
 class NavigationViewModel(private val accountManager: AccountManager) : ViewModel() {
-    val isAuthorized = accountManager.isLoggedIn.asValueFlow()
-    fun logOut() {
-        accountManager.logOut()
-    }
+  val isAuthorized = accountManager.isLoggedIn.asValueFlow()
+
+  fun logOut() {
+    accountManager.logOut()
+  }
 }
 
 @Composable
 fun Navigation() {
-    val navController = rememberNavController()
-    val viewModel = koinViewModel<NavigationViewModel>()
-    val isAuthorized by viewModel.isAuthorized.collectValueAsState()
+  val navController = rememberNavController()
+  val viewModel = koinViewModel<NavigationViewModel>()
+  val isAuthorized by viewModel.isAuthorized.collectValueAsState()
 
-    NavHost(
-        navController = navController,
-        startDestination = (if (isAuthorized) Screen.Authorized else Screen.Unauthorized).route
-    ) {
-        composable(Screen.Authorized.route) {
-            MainScreen(navController)
-        }
-        composable(Screen.Authorized.Profile.route) {
-            ProfileScreen(koinViewModel())
-        }
-        composable(Screen.Unauthorized.route) {
-            UnauthorizedScreen(navController)
-        }
-        composable(Screen.Unauthorized.Login.route) {
-            LoginScreen(navController, koinViewModel())
-        }
-        composable(Screen.Unauthorized.Login.PasswordRecovery.route) {
-            PasswordRecoveryScreen(navController, koinViewModel())
-        }
-        composable(Screen.Unauthorized.Register.route) {
-            RegistrationScreen(navController, koinViewModel())
-        }
-        composable(Screen.Unauthorized.Login.PasswordRecovery.NewPassword.route) {
-            NewPasswordScreen(navController, koinViewModel())
-        }
+  NavHost(
+      navController = navController,
+      startDestination = (if (isAuthorized) Screen.Authorized else Screen.Unauthorized).route,
+  ) {
+    composable(Screen.Authorized.route) { MainScreen(navController) }
+    composable(Screen.Authorized.Profile.route) { ProfileScreen(koinViewModel()) }
+    composable(Screen.Unauthorized.route) { UnauthorizedScreen(navController) }
+    composable(Screen.Unauthorized.Login.route) { LoginScreen(navController, koinViewModel()) }
+    composable(Screen.Unauthorized.Login.PasswordRecovery.route) {
+      PasswordRecoveryScreen(navController, koinViewModel())
     }
+    composable(Screen.Unauthorized.Register.route) {
+      RegistrationScreen(navController, koinViewModel())
+    }
+    composable(Screen.Unauthorized.Login.PasswordRecovery.NewPassword.route) {
+      NewPasswordScreen(navController, koinViewModel())
+    }
+  }
 }

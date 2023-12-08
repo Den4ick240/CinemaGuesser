@@ -1,6 +1,5 @@
 package ru.nsu.ccfit.cinemaguesser.ui.unauthorized
 
-import android.content.SharedPreferences
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -49,28 +48,24 @@ import ru.nsu.ccfit.cinemaguesser.ui.isValidUsername
 class RegisterViewModel(
     private val accountManager: AccountManager,
 ) : ViewModel() {
-    suspend fun register(username: String, email: String, password: String): RegisterResult {
-        return accountManager.register(username, email, password)
-    }
+  suspend fun register(username: String, email: String, password: String): RegisterResult {
+    return accountManager.register(username, email, password)
+  }
 }
 
 @Composable
 fun RegistrationScreen(navController: NavController, viewModel: RegisterViewModel) {
-    Column(
-        modifier = Modifier.padding(16.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.spacedBy(16.dp, Alignment.CenterVertically)
-    ) {
+  Column(
+      modifier = Modifier.padding(16.dp),
+      horizontalAlignment = Alignment.CenterHorizontally,
+      verticalArrangement = Arrangement.spacedBy(16.dp, Alignment.CenterVertically)) {
         AppTitle()
         Text(
             text = stringResource(R.string.registration),
-            style = MaterialTheme.typography.titleMedium
-        )
+            style = MaterialTheme.typography.titleMedium)
 
         var generalError by remember { mutableStateOf<String?>(null) }
-        generalError?.let {
-            Text(text = it, color = MaterialTheme.colorScheme.error)
-        }
+        generalError?.let { Text(text = it, color = MaterialTheme.colorScheme.error) }
 
         var email by remember { mutableStateOf(TextFieldValue()) }
         var emailError by remember { mutableStateOf<String?>(null) }
@@ -88,132 +83,124 @@ fun RegistrationScreen(navController: NavController, viewModel: RegisterViewMode
         val showPassword = remember { mutableStateOf(false) }
 
         OutlinedTextField(
-            modifier = Modifier
-                .fillMaxWidth(),
+            modifier = Modifier.fillMaxWidth(),
             value = username,
             onValueChange = {
-                usernameError = null
-                username = it
+              usernameError = null
+              username = it
             },
             label = { Text(stringResource(R.string.username)) },
             singleLine = true,
             keyboardActions = KeyboardActions(onDone = { emailFocusRequester.requestFocus() }),
             isError = usernameError != null,
             supportingText = {
-                usernameError?.let {
-                    Text(
-                        modifier = Modifier.fillMaxWidth(),
-                        text = it,
-                        color = MaterialTheme.colorScheme.error
-                    )
-                }
+              usernameError?.let {
+                Text(
+                    modifier = Modifier.fillMaxWidth(),
+                    text = it,
+                    color = MaterialTheme.colorScheme.error)
+              }
             },
         )
 
         OutlinedTextField(
-            modifier = Modifier
-                .focusRequester(emailFocusRequester)
-                .fillMaxWidth(),
+            modifier = Modifier.focusRequester(emailFocusRequester).fillMaxWidth(),
             value = email,
             onValueChange = {
-                emailError = null
-                email = it
+              emailError = null
+              email = it
             },
             label = { Text(stringResource(R.string.email)) },
             singleLine = true,
             keyboardActions = KeyboardActions(onDone = { passwordFocusRequester.requestFocus() }),
             isError = emailError != null,
             supportingText = {
-                emailError?.let {
-                    Text(
-                        modifier = Modifier.fillMaxWidth(),
-                        text = it,
-                        color = MaterialTheme.colorScheme.error
-                    )
-                }
+              emailError?.let {
+                Text(
+                    modifier = Modifier.fillMaxWidth(),
+                    text = it,
+                    color = MaterialTheme.colorScheme.error)
+              }
             },
         )
 
         OutlinedTextField(
-            modifier = Modifier
-                .fillMaxWidth()
-                .focusRequester(passwordFocusRequester),
+            modifier = Modifier.fillMaxWidth().focusRequester(passwordFocusRequester),
             value = password,
             onValueChange = {
-                passwordError = null
-                password = it
+              passwordError = null
+              password = it
             },
             label = { Text(stringResource(R.string.password)) },
             singleLine = true,
-            keyboardOptions = KeyboardOptions.Default.copy(
-                autoCorrect = true,
-                keyboardType = KeyboardType.Text,
-                imeAction = ImeAction.Done
-            ),
-            keyboardActions = KeyboardActions(onDone = { secondPasswordFocusRequester.requestFocus() }),
-            visualTransformation = if (showPassword.value) VisualTransformation.None else PasswordVisualTransformation(),
+            keyboardOptions =
+                KeyboardOptions.Default.copy(
+                    autoCorrect = true,
+                    keyboardType = KeyboardType.Text,
+                    imeAction = ImeAction.Done),
+            keyboardActions =
+                KeyboardActions(onDone = { secondPasswordFocusRequester.requestFocus() }),
+            visualTransformation =
+                if (showPassword.value) VisualTransformation.None
+                else PasswordVisualTransformation(),
             trailingIcon = {
-                val icon =
-                    if (showPassword.value) Icons.Filled.Visibility else Icons.Filled.VisibilityOff
+              val icon =
+                  if (showPassword.value) Icons.Filled.Visibility else Icons.Filled.VisibilityOff
 
-                IconButton(onClick = { showPassword.value = !showPassword.value }) {
-                    Icon(
-                        icon,
-                        contentDescription = "Visibility",
-                        tint = MaterialTheme.colorScheme.primary
-                    )
-                }
+              IconButton(onClick = { showPassword.value = !showPassword.value }) {
+                Icon(
+                    icon,
+                    contentDescription = "Visibility",
+                    tint = MaterialTheme.colorScheme.primary)
+              }
             },
             isError = passwordError != null,
             supportingText = {
-                passwordError?.let {
-                    Text(
-                        modifier = Modifier.fillMaxWidth(),
-                        text = it,
-                        color = MaterialTheme.colorScheme.error
-                    )
-                }
+              passwordError?.let {
+                Text(
+                    modifier = Modifier.fillMaxWidth(),
+                    text = it,
+                    color = MaterialTheme.colorScheme.error)
+              }
             },
         )
         OutlinedTextField(
-            modifier = Modifier
-                .fillMaxWidth()
-                .focusRequester(secondPasswordFocusRequester),
+            modifier = Modifier.fillMaxWidth().focusRequester(secondPasswordFocusRequester),
             value = secondPassword,
             onValueChange = {
-                secondPasswordError = null
-                secondPassword = it
+              secondPasswordError = null
+              secondPassword = it
             },
             label = { Text(stringResource(R.string.repeat_password)) },
             singleLine = true,
-            keyboardOptions = KeyboardOptions.Default.copy(
-                autoCorrect = true,
-                keyboardType = KeyboardType.Text,
-                imeAction = ImeAction.Done
-            ),
+            keyboardOptions =
+                KeyboardOptions.Default.copy(
+                    autoCorrect = true,
+                    keyboardType = KeyboardType.Text,
+                    imeAction = ImeAction.Done),
             keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
-            visualTransformation = if (showPassword.value) VisualTransformation.None else PasswordVisualTransformation(),
+            visualTransformation =
+                if (showPassword.value) VisualTransformation.None
+                else PasswordVisualTransformation(),
             trailingIcon = {
-                val icon =
-                    if (showPassword.value) Icons.Filled.Visibility else Icons.Filled.VisibilityOff
+              val icon =
+                  if (showPassword.value) Icons.Filled.Visibility else Icons.Filled.VisibilityOff
 
-                IconButton(onClick = { showPassword.value = !showPassword.value }) {
-                    Icon(
-                        icon,
-                        contentDescription = "Visibility",
-                        tint = MaterialTheme.colorScheme.primary
-                    )
-                }
+              IconButton(onClick = { showPassword.value = !showPassword.value }) {
+                Icon(
+                    icon,
+                    contentDescription = "Visibility",
+                    tint = MaterialTheme.colorScheme.primary)
+              }
             },
             isError = secondPasswordError != null,
             supportingText = {
-                secondPasswordError?.let {
-                    Text(
-                        modifier = Modifier.fillMaxWidth(),
-                        text = it,
-                        color = MaterialTheme.colorScheme.error
-                    )
-                }
+              secondPasswordError?.let {
+                Text(
+                    modifier = Modifier.fillMaxWidth(),
+                    text = it,
+                    color = MaterialTheme.colorScheme.error)
+              }
             },
         )
 
@@ -227,34 +214,37 @@ fun RegistrationScreen(navController: NavController, viewModel: RegisterViewMode
         val emailAlreadyExists = stringResource(id = R.string.email_exists)
 
         fun onRegisterError(registerResult: RegisterResult) {
-            when (registerResult) {
-                RegisterResult.Success -> {
-                    navController.navigate(Screen.Unauthorized.Login.route) {
-                        popUpTo(Screen.Unauthorized.route) { inclusive = true }
-                    }
-                }
-
-                RegisterResult.UsernameExists -> usernameError = usernameAlreadyExists
-                RegisterResult.EmailExists -> emailError = emailAlreadyExists
-                RegisterResult.NoInternet -> generalError = noInternet
-                else -> generalError = other
+          when (registerResult) {
+            RegisterResult.Success -> {
+              navController.navigate(Screen.Unauthorized.Login.route) {
+                popUpTo(Screen.Unauthorized.route) { inclusive = true }
+              }
             }
+            RegisterResult.UsernameExists -> usernameError = usernameAlreadyExists
+            RegisterResult.EmailExists -> emailError = emailAlreadyExists
+            RegisterResult.NoInternet -> generalError = noInternet
+            else -> generalError = other
+          }
         }
 
         val coroutineScope = rememberCoroutineScope()
-        Button(onClick = {
-            if (!isValidUsername(username.text)) usernameError = invalidUsername
-            else if (!isValidEmail(email.text)) emailError = invalidEmail
-            else if (!isValidPassword(password.text)) passwordError = invalidPassword
-            else if (password.text != secondPassword.text) secondPasswordError = passwordsDontMatch
-            else coroutineScope.launch {
-                loading = true
-                viewModel.register(username.text, email.text, password.text)
-                    .let(::onRegisterError)
-                loading = false
+        Button(
+            onClick = {
+              if (!isValidUsername(username.text)) usernameError = invalidUsername
+              else if (!isValidEmail(email.text)) emailError = invalidEmail
+              else if (!isValidPassword(password.text)) passwordError = invalidPassword
+              else if (password.text != secondPassword.text)
+                  secondPasswordError = passwordsDontMatch
+              else
+                  coroutineScope.launch {
+                    loading = true
+                    viewModel
+                        .register(username.text, email.text, password.text)
+                        .let(::onRegisterError)
+                    loading = false
+                  }
+            }) {
+              Text(text = stringResource(R.string.registration_action))
             }
-        }) {
-            Text(text = stringResource(R.string.registration_action))
-        }
-    }
+      }
 }
