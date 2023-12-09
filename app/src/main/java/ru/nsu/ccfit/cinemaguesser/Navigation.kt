@@ -33,7 +33,7 @@ fun Navigation() {
       navController = navController,
       startDestination = (if (isAuthorized) Screen.Authorized else Screen.Unauthorized).route,
   ) {
-    composable(Screen.Authorized.route) { MainScreen(navController) }
+    composable(Screen.Authorized.route) { MainScreen(navController, koinViewModel()) }
     composable(Screen.Authorized.Profile.route) { ProfileScreen(koinViewModel()) }
     composable(Screen.Unauthorized.route) { UnauthorizedScreen(navController) }
     composable(Screen.Unauthorized.Login.route) { LoginScreen(navController, koinViewModel()) }

@@ -12,6 +12,7 @@
     <string name="username_not_found">Имя пользователя не найдено</string>
     <string name="password_incorrect">Не правильный пароль</string>
     <string name="connection_error">Ошибка соединения, провертье подключение к интернету</string>
+    <string name="auth_errror">Ошибка авторизации</string>
     <string name="unexpected_error">Неожиданная ошибка, попробуйте позже</string>
     <string name="username">Логин</string>
     <string name="invalid_username">Логин может содержать только буквы латинского алфавита, цифры (0–9) и спецсимволы @,!~-+*.</string>
@@ -36,4 +37,18 @@
     <string name="instructions">Чтобы начать игру, нажмите на кнопку "Новая игра" и следуйте дальнейшим инструкциям.</string>
     <string name="greetings">Добро пожаловать в Cinema Guesser!</string>
     <string name="log_out_btn">Выйти</string>
+    <string name="easy">Легкая</string>
+    <string name="mid">Средняя </string>
+    <string name="difficult">Сложная</string>
+    <string name="cancel">Отменить</string>
+    <string name="hint_selection">Выбор подсказки</string>
+    <string name="actor_hint">Актёры</string>
+    <string name="director_hint">Режисёр</string>
+    <string name="genre_hint">Жанры</string>
+    <string name="keyword_hint">Тэги</string>
+    <string name="images_hint">Кадры</string>
+    <string name="years_hint">Год</string>
+    <string name="rating_hint">Рейтинг</string>
+    <string name="countries_hint">Страна</string>
+    <string name="additional_hints">Дополнительные подсказки:</string>
 </resources>

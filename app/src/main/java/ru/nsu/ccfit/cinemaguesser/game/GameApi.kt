@@ -3,6 +3,9 @@ package ru.nsu.ccfit.cinemaguesser.game
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.plugins.resources.get
+import io.ktor.client.statement.HttpResponse
+import io.ktor.client.statement.bodyAsText
+import io.ktor.http.HttpStatusCode
 import io.ktor.resources.Resource
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
@@ -47,24 +50,52 @@ data class AnswerResponse(
     val round: RoundInfo,
 )
 
+class NotAuthorizedException() : Exception() {}
+
+class NoConnectionException() : Exception() {}
+
 class GameApi(private val client: HttpClient) {
   suspend fun startGame(difficulty: Difficulty): RoundInfo =
-      client.get(GameResource.Start(level = difficulty)).body<RoundInfo>()
+      checkNoInternet { client.get(GameResource.Start(level = difficulty)) }
+          .checkAuthorized()
+          .body<RoundInfo>()
 
   suspend fun getAvailableHints(id: Int): List<HintType> =
-      client
-          .get(GameResource.WithId.GetAvailableHints(GameResource.WithId(id = id)))
+      checkNoInternet {
+            client.get(GameResource.WithId.GetAvailableHints(GameResource.WithId(id = id)))
+          }
+          .checkAuthorized()
           .body<List<HintType>>()
 
   suspend fun getHint(id: Int, type: HintType): HintResponse =
-      client
-          .get(GameResource.WithId.GetHint(GameResource.WithId(id = id), type))
+      checkNoInternet {
+            client.get(GameResource.WithId.GetHint(GameResource.WithId(id = id), type))
+          }
+          .checkAuthorized()
           .body<HintResponse>()
 
   suspend fun answer(id: Int, answer: String): AnswerResponse =
-      client
-          .get(GameResource.WithId.Answer(GameResource.WithId(id = id), answer))
+      checkNoInternet {
+            client.get(GameResource.WithId.Answer(GameResource.WithId(id = id), answer))
+          }
+          .checkAuthorized()
           .body<AnswerResponse>()
+
+  suspend fun endGame(id: Int): Boolean =
+      checkNoInternet { client.get(GameResource.WithId.End(GameResource.WithId(id = id))) }
+          .checkAuthorized()
+          .bodyAsText() == "Игра закончена."
+
+  private fun HttpResponse.checkAuthorized() = also {
+    if (it.status == HttpStatusCode.Forbidden) throw NotAuthorizedException()
+  }
+
+  private suspend inline fun <T> checkNoInternet(crossinline body: suspend () -> T): T =
+      try {
+        body()
+      } catch (e: Exception) {
+        throw NoConnectionException()
+      }
 }
 
 @Serializable

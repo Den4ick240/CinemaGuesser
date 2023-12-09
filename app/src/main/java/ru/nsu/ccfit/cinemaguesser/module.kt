@@ -2,6 +2,7 @@ package ru.nsu.ccfit.cinemaguesser
 
 import android.app.Application
 import android.content.SharedPreferences
+import android.util.Log
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.plugins.auth.Auth
@@ -9,6 +10,7 @@ import io.ktor.client.plugins.auth.providers.BearerTokens
 import io.ktor.client.plugins.auth.providers.bearer
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.client.plugins.defaultRequest
+import io.ktor.client.plugins.logging.ANDROID
 import io.ktor.client.plugins.logging.DEFAULT
 import io.ktor.client.plugins.logging.LogLevel
 import io.ktor.client.plugins.logging.Logger
@@ -30,6 +32,9 @@ import org.koin.core.module.dsl.factoryOf
 import org.koin.core.module.dsl.singleOf
 import org.koin.dsl.module
 import ru.nsu.ccfit.cinemaguesser.game.GameApi
+import ru.nsu.ccfit.cinemaguesser.game.GameService
+import ru.nsu.ccfit.cinemaguesser.ui.authorized.GameScreen
+import ru.nsu.ccfit.cinemaguesser.ui.authorized.MainScreenViewModel
 import ru.nsu.ccfit.cinemaguesser.ui.authorized.ProfileViewModel
 import ru.nsu.ccfit.cinemaguesser.ui.unauthorized.LoginViewModel
 import ru.nsu.ccfit.cinemaguesser.ui.unauthorized.NewPasswordViewModel
@@ -44,11 +49,13 @@ val appModule = module {
   factoryOf(::TokenStore)
   factoryOf(::GameApi)
   singleOf(::AccountManager)
+  singleOf(::GameService)
   viewModelOf(::NavigationViewModel)
   viewModelOf(::LoginViewModel)
   viewModelOf(::RegisterViewModel)
   viewModelOf(::PasswordRecoveryViewModel)
   viewModelOf(::NewPasswordViewModel)
+  viewModelOf(::MainScreenViewModel)
   viewModelOf(::ProfileViewModel)
 
   factory {
@@ -61,7 +68,7 @@ val appModule = module {
       install(Resources) {}
       install(ContentNegotiation) { json(Json) }
       install(Logging) {
-        logger = Logger.DEFAULT
+        logger = CustomAndroidHttpLogger
         level = LogLevel.ALL
       }
       install(Auth) {
@@ -100,3 +107,10 @@ data class RefreshResponse(
     @SerialName("access_token") val accessToken: String,
     @SerialName("refresh_token") val refreshToken: String,
 )
+private object CustomAndroidHttpLogger : Logger {
+  private const val logTag = "CustomAndroidHttpLogger"
+
+  override fun log(message: String) {
+    Log.i(logTag, message)
+  }
+}
