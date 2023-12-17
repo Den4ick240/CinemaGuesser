@@ -1,5 +1,6 @@
 package ru.nsu.ccfit.cinemaguesser.ui.unauthorized
 
+import android.content.SharedPreferences
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -36,18 +37,25 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.ViewModel
 import androidx.navigation.NavController
 import kotlinx.coroutines.launch
-import ru.nsu.ccfit.cinemaguesser.AccountManager
-import ru.nsu.ccfit.cinemaguesser.ChangePasswordResult
+import ru.nsu.ccfit.cinemaguesser.PasswordRecoveryApi
+import ru.nsu.ccfit.cinemaguesser.PasswordRecoveryResult
 import ru.nsu.ccfit.cinemaguesser.R
 import ru.nsu.ccfit.cinemaguesser.Screen
 import ru.nsu.ccfit.cinemaguesser.ui.AppTitle
 import ru.nsu.ccfit.cinemaguesser.ui.isValidPassword
 
 class NewPasswordViewModel(
-    private val accountManager: AccountManager,
+    private val api: PasswordRecoveryApi,
+    private val sharedPreferences: SharedPreferences,
 ) : ViewModel() {
-  suspend fun changePassword(password: String): ChangePasswordResult {
-    return accountManager.changePassword(password)
+  val email
+    get() = sharedPreferences.getString("recemail", "") ?: ""
+
+  val code
+    get() = sharedPreferences.getInt("reccode", 0)
+
+  suspend fun changePassword(password: String): PasswordRecoveryResult {
+    return api.setPassword(email, code, password)
   }
 }
 
@@ -146,14 +154,14 @@ fun NewPasswordScreen(
     val invalidPassword = stringResource(R.string.invalid_password)
     val coroutineScope = rememberCoroutineScope()
 
-    fun onRes(res: ChangePasswordResult) {
-      when (res) {
-        ChangePasswordResult.Success ->
-            navController.navigate(Screen.Unauthorized.Login.route) {
-              popUpTo(Screen.Unauthorized.route) { inclusive = true }
-            }
-        ChangePasswordResult.NoInternet -> generalError = noInternet
-        ChangePasswordResult.OtherError -> generalError = other
+    fun onRes(res: PasswordRecoveryResult) {
+      if (res.success) {
+
+        navController.navigate(Screen.Unauthorized.Login.route) {
+          popUpTo(Screen.Unauthorized.route) { inclusive = true }
+        }
+      } else {
+        generalError = res.message
       }
     }
     Button(

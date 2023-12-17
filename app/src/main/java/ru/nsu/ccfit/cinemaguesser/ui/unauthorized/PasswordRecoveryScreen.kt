@@ -1,5 +1,6 @@
 package ru.nsu.ccfit.cinemaguesser.ui.unauthorized
 
+import android.content.SharedPreferences
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -30,17 +31,20 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.mapLatest
 import kotlinx.coroutines.launch
-import ru.nsu.ccfit.cinemaguesser.AccountManager
+import ru.nsu.ccfit.cinemaguesser.PasswordRecovery
+import ru.nsu.ccfit.cinemaguesser.PasswordRecoveryApi
+import ru.nsu.ccfit.cinemaguesser.PasswordRecoveryResult
 import ru.nsu.ccfit.cinemaguesser.R
 import ru.nsu.ccfit.cinemaguesser.Screen
-import ru.nsu.ccfit.cinemaguesser.SendCodeResult
-import ru.nsu.ccfit.cinemaguesser.VerifyResult
 import ru.nsu.ccfit.cinemaguesser.ui.AppTitle
 import ru.nsu.ccfit.cinemaguesser.ui.isValidEmail
 
 private const val Seconds = 20_000
 
-class PasswordRecoveryViewModel(private val accountManager: AccountManager) : ViewModel() {
+class PasswordRecoveryViewModel(
+    private val api: PasswordRecoveryApi,
+    private val sharedPreferencesEditor: SharedPreferences.Editor,
+) : ViewModel() {
   private val _isCodeSent = MutableStateFlow(false)
   val isCodeSent: Flow<Boolean>
     get() = _isCodeSent
@@ -48,10 +52,13 @@ class PasswordRecoveryViewModel(private val accountManager: AccountManager) : Vi
   private var time: Long = 0
   private val _timeLeft = MutableStateFlow<Long>(0)
   val secondLeft = _timeLeft.mapLatest { it.coerceAtLeast(0) / 1000 }
+  private var email: String = ""
 
-  suspend fun sendCode(email: String): SendCodeResult {
-    val res = accountManager.sendCode(email)
-    if (res == SendCodeResult.Success) {
+  suspend fun sendCode(email: String): PasswordRecoveryResult {
+    this.email = email
+    val res = api.sendCode(email)
+
+    if (res.success) {
       _isCodeSent.value = true
       time = System.currentTimeMillis()
       viewModelScope.launch {
@@ -68,11 +75,12 @@ class PasswordRecoveryViewModel(private val accountManager: AccountManager) : Vi
     return res
   }
 
-  suspend fun verify(text: String): VerifyResult {
-    return accountManager.verify(text).also {
-      if (it == VerifyResult.WrongCode) {
-        _isCodeSent.value = false
-        time = 0L
+  suspend fun verify(text: String): PasswordRecoveryResult {
+    return api.verifyCode(email, text.toInt()).also {
+      if (it.success) {
+        sharedPreferencesEditor.putString("recemail", email)
+        sharedPreferencesEditor.putInt("reccode", text.toInt())
+        sharedPreferencesEditor.commit()
       }
     }
   }
@@ -144,11 +152,9 @@ fun PasswordRecoveryScreen(navController: NavController, viewModel: PasswordReco
         val noInternet = stringResource(R.string.connection_error)
         val other = stringResource(R.string.unexpected_error)
         val invalidEmail = stringResource(R.string.invalid_email)
-        fun onRes(res: SendCodeResult) {
-          return when (res) {
-            SendCodeResult.Success -> generalError = null
-            SendCodeResult.NoInternet -> generalError = noInternet
-            SendCodeResult.OtherError -> generalError = other
+        fun onRes(res: PasswordRecoveryResult) {
+          if (!res.success) {
+            generalError = res.message
           }
         }
 
@@ -178,19 +184,17 @@ fun PasswordRecoveryScreen(navController: NavController, viewModel: PasswordReco
               }
             }
         val wrongCode = stringResource(id = R.string.wrong_code)
-        fun onRes(res: VerifyResult) {
-          when (res) {
-            VerifyResult.Success ->
-                navController.navigate(Screen.Unauthorized.Login.PasswordRecovery.NewPassword.route)
-            VerifyResult.WrongCode -> generalError = wrongCode
-            VerifyResult.NoInternet -> generalError = noInternet
-            VerifyResult.OtherError -> generalError = other
-          }
+        fun onResVerify(res: PasswordRecoveryResult) {
+          if (res.success)
+              navController.navigate(Screen.Unauthorized.Login.PasswordRecovery.NewPassword.route)
+          else generalError = res.message
         }
         if (isCodeSent) {
           Button(
               modifier = Modifier.fillMaxWidth(),
-              onClick = { coroutineScope.launch { viewModel.verify(code.text).let(::onRes) } }) {
+              onClick = {
+                coroutineScope.launch { viewModel.verify(code.text).let(::onResVerify) }
+              }) {
                 Text(text = stringResource(R.string.verify))
               }
         }
