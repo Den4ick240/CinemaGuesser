@@ -40,10 +40,12 @@ class GameState(
   private val _gameEnd = MutableStateFlow<GameEnd?>(null)
   private val _hintList = MutableStateFlow(emptyList<Hint>())
   val hintList: ValueFlow<List<Hint>> = _hintList.asValueFlow()
-    val gameEnd = _gameEnd.asValueFlow()
+  val gameEnd = _gameEnd.asValueFlow()
+  private val _loading = MutableStateFlow(false)
+  val loading = _loading.asValueFlow()
 
   val score = _roundInfo.asValueFlow().mapValue { it.score }
-    val answers = _roundInfo.asValueFlow().mapValue { it.answers }
+  val answers = _roundInfo.asValueFlow().mapValue { it.answers }
 
   val time =
       flow {
@@ -54,14 +56,18 @@ class GameState(
             }
           }
           .stateIn(coroutineScope, SharingStarted.Lazily, System.currentTimeMillis() - startTime)
+          .asValueFlow()
 
   init {
     coroutineScope.launch { updateHintTypes() }
   }
 
   private suspend fun updateHintTypes() {
+    if (_gameEnd.value != null) return
+    _loading.value = true
     _hintTypes.value =
         accountManager.checkAuthorizedResult { api.getAvailableHints(_roundInfo.value.id) }
+    _loading.value = false
   }
 
   suspend fun reloadHintTypes() {
@@ -72,52 +78,66 @@ class GameState(
     if (hintType !in hintTypeList.value) {
       return Result.Success(null)
     }
-    return accountManager.checkAuthorizedResult {
-      val hint = api.getHint(_roundInfo.value.id, hintType)
-      _roundInfo.value = _roundInfo.value.copy(score = hint.score)
-      val hintt = Hint(hintType, hint.hint)
-      _hintList.value = _hintList.value + listOf(hintt)
-      if (!hint.alive) {
-        _gameEnd.value = GameEnd.Fail
-        null
-      } else {
-        hintt
-      }
-    }
+    _loading.value = true
+    val res =
+        accountManager.checkAuthorizedResult {
+          val hint = api.getHint(_roundInfo.value.id, hintType) ?: return@checkAuthorizedResult null
+          _roundInfo.value = _roundInfo.value.copy(score = hint.score)
+          val hintt = Hint(hintType, hint.hint)
+          _hintList.value = _hintList.value + listOf(hintt)
+          if (!hint.alive) {
+            _gameEnd.value = GameEnd.Fail
+            null
+          } else {
+            hintt
+          }
+        }
+    reloadHintTypes()
+    _loading.value = false
+    return res
   }
 
   suspend fun answer(index: Int): Result<Boolean> {
     val answer = _roundInfo.value.answers[index]
-    return accountManager.checkAuthorizedResult {
-      val (right, alive, newRoundInfo) = api.answer(_roundInfo.value.id, answer)
-      _roundInfo.value = newRoundInfo
-      if (right) {
-        _gameEnd.value = GameEnd.Success(newRoundInfo.score)
-      } else if (!alive) {
-        _gameEnd.value = GameEnd.Fail
-      }
+    _loading.value = true
+    return accountManager
+        .checkAuthorizedResult {
+          val (right, alive, newRoundInfo, score) = api.answer(_roundInfo.value.id, answer)
+          _roundInfo.value = (newRoundInfo ?: _roundInfo.value).copy(score = score)
+          if (right) {
+            _gameEnd.value = GameEnd.Success(_roundInfo.value.score)
+          } else if (!alive) {
+            _gameEnd.value = GameEnd.Fail
+          }
 
-      right
-    }
+          right
+        }
+        .also { _loading.value = false }
   }
 
-  suspend fun endGame(): Result<Unit> =
-      accountManager
-          .checkAuthorized {
-            val success = api.endGame(_roundInfo.value.id)
-            val res =
-                if (success) {
-                  Result.Success(Unit)
-                } else Result.Other()
+  suspend fun endGame(): Result<Unit> {
+    if (_gameEnd.value != null) {
+      onGameEnd()
+      coroutineScope.cancel()
+      return Result.Success(Unit)
+    }
+    return accountManager
+        .checkAuthorized {
+          val success = api.endGame(_roundInfo.value.id)
+          val res =
+              if (success) {
+                Result.Success(Unit)
+              } else Result.Other()
 
-            res
+          res
+        }
+        .also {
+          if (it is Result.Success) {
+            onGameEnd()
+            coroutineScope.cancel()
           }
-          .also {
-            if (it is Result.Success) {
-              onGameEnd()
-              coroutineScope.cancel()
-            }
-          }
+        }
+  }
 }
 
 class GameService(

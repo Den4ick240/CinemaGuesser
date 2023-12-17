@@ -1,15 +1,22 @@
 package ru.nsu.ccfit.cinemaguesser.ui.authorized
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.selection.selectableGroup
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Add
 import androidx.compose.material.icons.rounded.DownloadDone
@@ -35,6 +42,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import coil.compose.rememberAsyncImagePainter
+import java.util.concurrent.TimeUnit
 import kotlinx.coroutines.launch
 import ru.nsu.ccfit.cinemaguesser.R
 import ru.nsu.ccfit.cinemaguesser.collectValueAsState
@@ -55,6 +64,20 @@ fun GameScreen(game: GameState) {
   val score by game.score.collectValueAsState()
   val answers by game.answers.collectValueAsState()
   val enderDragon by game.gameEnd.collectValueAsState()
+  val loading by game.loading.collectValueAsState()
+
+  if (loading) {
+    AlertDialog(onDismissRequest = {}) {
+      Column(
+          modifier = Modifier.background(Color.White).padding(16.dp),
+          horizontalAlignment = Alignment.CenterHorizontally,
+          verticalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterVertically),
+      ) {
+        Text("Загрузка...")
+        CircularProgressIndicator()
+      }
+    }
+  }
 
   if (showDialog || selectedHint == null)
       SelectHint(hintTypes, hintList, game = game, dismiss = { showDialog = false }) {
@@ -65,10 +88,14 @@ fun GameScreen(game: GameState) {
   val coroutineScope = rememberCoroutineScope()
   enderDragon?.let {
     AlertDialog(onDismissRequest = { coroutineScope.launch { game.endGame() } }) {
-      Column {
+      Column(
+          modifier = Modifier.background(Color.White).padding(16.dp),
+          verticalArrangement = Arrangement.spacedBy(8.dp),
+      ) {
         when (it) {
-          GameEnd.Fail -> Text("Вы проиграли")
-          is GameEnd.Success -> Text("Вы выиграли! Очки: ${it.score}")
+          GameEnd.Fail -> Text("Вы проиграли", style = MaterialTheme.typography.headlineLarge)
+          is GameEnd.Success ->
+              Text("Вы выиграли! Очки: ${it.score}", style = MaterialTheme.typography.headlineLarge)
         }
         Button(
             modifier = Modifier.fillMaxWidth(),
@@ -85,13 +112,13 @@ fun GameScreen(game: GameState) {
       verticalArrangement = Arrangement.spacedBy(16.dp),
   ) {
     Card(
-        modifier = Modifier.padding(16.dp).fillMaxWidth(),
+        modifier = Modifier.fillMaxWidth().weight(1f),
     ) {
       Column(
           modifier = Modifier.fillMaxWidth().padding(16.dp),
           verticalArrangement = Arrangement.spacedBy(16.dp),
       ) {
-        Text("Очки: $score")
+        Header(game, score)
         selectedHint?.let { HintView(it) }
         Button(
             modifier = Modifier.fillMaxWidth(),
@@ -109,7 +136,7 @@ fun GameScreen(game: GameState) {
       languages.forEach { text ->
         item {
           Row(
-              Modifier.fillMaxWidth().height(56.dp),
+              Modifier.fillMaxWidth(),
               verticalAlignment = Alignment.CenterVertically,
           ) {
             RadioButton(
@@ -121,12 +148,18 @@ fun GameScreen(game: GameState) {
         }
       }
     }
+    var answerRes by remember { mutableStateOf<Result<Boolean>?>(null) }
+    when (val answerRes = answerRes) {
+      is Result.NoInternet -> Text(stringResource(R.string.connection_error))
+      is Result.NotAuthorized -> Text(stringResource(R.string.auth_errror))
+      is Result.Other -> Text(stringResource(R.string.unexpected_error))
+      is Result.Success -> if (!answerRes.result) Text(stringResource(R.string.wrong_answer))
+      null -> Unit
+    }
     Button(
         modifier = Modifier.fillMaxWidth(),
         onClick = {
-          coroutineScope.launch {
-            val res = game.answer(answers.indexOf(selectedAnswer))
-          }
+          coroutineScope.launch { answerRes = game.answer(answers.indexOf(selectedAnswer)) }
         },
     ) {
       Text("Отправить ответ")
@@ -135,9 +168,57 @@ fun GameScreen(game: GameState) {
 }
 
 @Composable
-fun HintView(hint: Hint) {
+private fun Header(game: GameState, score: Int) {
+  val time by game.time.collectValueAsState()
+  val seconds = TimeUnit.MILLISECONDS.toSeconds(time) % 60
+  val minutes = TimeUnit.MILLISECONDS.toMinutes(time) % 60
+  val hours = TimeUnit.MILLISECONDS.toHours(time)
+  val tt = buildString {
+    if (hours > 0) {
+      append(hours)
+      append(":")
+    }
+    if (minutes > 0) {
+      if (minutes < 10) append(0)
+      append(minutes)
+      append(":")
+      if (seconds < 10) append(0)
+    }
+    append(seconds)
+  }
+  Text("Очки: $score, Время: $tt")
+}
+
+@Composable
+fun ColumnScope.HintView(hint: Hint) {
   Text("Тип подсказки: ${hint.hintType.title()}")
-  hint.values.forEach { Text(it) }
+  if (hint.values.isEmpty()) {
+    Text(text = "Пусто =(")
+  } else if (hint.hintType == IMAGES) {
+    BoxWithConstraints(Modifier.weight(1f)) {
+      Row(
+          Modifier.horizontalScroll(rememberScrollState()),
+          verticalAlignment = Alignment.CenterVertically,
+      ) {
+        hint.values.forEach {
+          Image(
+              painter = rememberAsyncImagePainter(it),
+              contentDescription = null,
+              modifier =
+                  Modifier.heightIn(max = this@BoxWithConstraints.maxHeight)
+                      .widthIn(max = this@BoxWithConstraints.maxWidth),
+          )
+        }
+      }
+    }
+  } else {
+    Column(Modifier.verticalScroll(rememberScrollState()).weight(1f)) {
+      Text(
+          hint.values.joinToString(", "),
+          modifier = Modifier.fillMaxWidth(),
+      )
+    }
+  }
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -220,18 +301,18 @@ fun SelectHint(
                             loading = false
                             if (hint is Result.Success && hint.result != null) {
                               selectHint(hint.result)
-                            }
-                          }
-                        },
-                )
-              }
-            }
-          }
-        }
-      }
-    }
-  }
-}
+                            } // NO HOMO
+                          } // NO HOMO
+                        }, // NO HOMO
+                ) // NO HOMO
+              } // NO HOMO
+            } // NO HOMO
+          } // NO HOMO
+        } // NO HOMO
+      } // NO HOMO
+    } // NO HOMO
+  } // NO HOMO
+} // NO HOMO
 
 @Composable
 fun HintType.title() =

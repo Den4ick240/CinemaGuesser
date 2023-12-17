@@ -14,6 +14,7 @@
     <string name="connection_error">Ошибка соединения, провертье подключение к интернету</string>
     <string name="auth_errror">Ошибка авторизации</string>
     <string name="unexpected_error">Неожиданная ошибка, попробуйте позже</string>
+    <string name="wrong_answer">Неправильный ответ</string>
     <string name="username">Логин</string>
     <string name="invalid_username">Логин может содержать только буквы латинского алфавита, цифры (0–9) и спецсимволы @,!~-+*.</string>
     <string name="invalid_password">Пароль может содержать только буквы латинского алфавита, цифры (0–9) и спецсимволы ,./?\'";:=[]{}!~-+*@</string>

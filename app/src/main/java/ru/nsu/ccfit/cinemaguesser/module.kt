@@ -10,8 +10,6 @@ import io.ktor.client.plugins.auth.providers.BearerTokens
 import io.ktor.client.plugins.auth.providers.bearer
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.client.plugins.defaultRequest
-import io.ktor.client.plugins.logging.ANDROID
-import io.ktor.client.plugins.logging.DEFAULT
 import io.ktor.client.plugins.logging.LogLevel
 import io.ktor.client.plugins.logging.Logger
 import io.ktor.client.plugins.logging.Logging
@@ -33,7 +31,6 @@ import org.koin.core.module.dsl.singleOf
 import org.koin.dsl.module
 import ru.nsu.ccfit.cinemaguesser.game.GameApi
 import ru.nsu.ccfit.cinemaguesser.game.GameService
-import ru.nsu.ccfit.cinemaguesser.ui.authorized.GameScreen
 import ru.nsu.ccfit.cinemaguesser.ui.authorized.MainScreenViewModel
 import ru.nsu.ccfit.cinemaguesser.ui.authorized.ProfileViewModel
 import ru.nsu.ccfit.cinemaguesser.ui.unauthorized.LoginViewModel
@@ -48,6 +45,7 @@ val appModule = module {
   factory { CoroutineScope(Dispatchers.IO + SupervisorJob()) }
   factoryOf(::TokenStore)
   factoryOf(::GameApi)
+  factoryOf(::PasswordRecoveryApi)
   singleOf(::AccountManager)
   singleOf(::GameService)
   viewModelOf(::NavigationViewModel)
@@ -107,6 +105,7 @@ data class RefreshResponse(
     @SerialName("access_token") val accessToken: String,
     @SerialName("refresh_token") val refreshToken: String,
 )
+
 private object CustomAndroidHttpLogger : Logger {
   private const val logTag = "CustomAndroidHttpLogger"
 

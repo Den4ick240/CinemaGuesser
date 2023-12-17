@@ -75,6 +75,8 @@ dependencies {
     implementation("io.ktor:ktor-serialization-gson:2.3.6")
     implementation("io.ktor:ktor-serialization-kotlinx-json:2.3.6")
 
+    implementation("io.coil-kt:coil-compose:2.0.0-rc01")
+
     testImplementation("junit:junit:4.13.2")
     androidTestImplementation("androidx.compose.ui:ui-test-junit4")
     androidTestImplementation("androidx.test.espresso:espresso-core:3.5.1")

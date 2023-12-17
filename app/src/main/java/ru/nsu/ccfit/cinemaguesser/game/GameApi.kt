@@ -47,7 +47,8 @@ data class HintResponse(
 data class AnswerResponse(
     val right: Boolean,
     val alive: Boolean,
-    val round: RoundInfo,
+    val round: RoundInfo?,
+    val score: Int,
 )
 
 class NotAuthorizedException() : Exception() {}
@@ -67,11 +68,12 @@ class GameApi(private val client: HttpClient) {
           .checkAuthorized()
           .body<List<HintType>>()
 
-  suspend fun getHint(id: Int, type: HintType): HintResponse =
+  suspend fun getHint(id: Int, type: HintType): HintResponse? =
       checkNoInternet {
             client.get(GameResource.WithId.GetHint(GameResource.WithId(id = id), type))
           }
           .checkAuthorized()
+          .also { if (it.bodyAsText() == "Такая подсказка уже была дана.") return null }
           .body<HintResponse>()
 
   suspend fun answer(id: Int, answer: String): AnswerResponse =
@@ -124,7 +126,7 @@ class GameResource {
     @Resource("/getParameter")
     class GetHint(
         val parent: WithId,
-        val hintType: HintType,
+        val type: HintType,
     )
 
     @Serializable
