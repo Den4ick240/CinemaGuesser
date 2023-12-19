@@ -20,7 +20,7 @@ data class Hint(val hintType: HintType, val values: List<String>)
 sealed interface GameEnd {
   data class Success(val score: Int) : GameEnd
 
-  data object Fail : GameEnd
+  data class Fail(val answer: String) : GameEnd
 }
 
 class GameState(
@@ -86,7 +86,7 @@ class GameState(
           val hintt = Hint(hintType, hint.hint)
           _hintList.value = _hintList.value + listOf(hintt)
           if (!hint.alive) {
-            _gameEnd.value = GameEnd.Fail
+            _gameEnd.value = GameEnd.Fail("")
             null
           } else {
             hintt
@@ -103,11 +103,12 @@ class GameState(
     return accountManager
         .checkAuthorizedResult {
           val (right, alive, newRoundInfo, score) = api.answer(_roundInfo.value.id, answer)
-          _roundInfo.value = (newRoundInfo ?: _roundInfo.value).copy(score = score)
+          _roundInfo.value = newRoundInfo ?: _roundInfo.value.copy(score = score)
           if (right) {
+
             _gameEnd.value = GameEnd.Success(_roundInfo.value.score)
           } else if (!alive) {
-            _gameEnd.value = GameEnd.Fail
+            _gameEnd.value = GameEnd.Fail("")
           }
 
           right
@@ -116,6 +117,12 @@ class GameState(
   }
 
   suspend fun endGame(): Result<Unit> {
+    if (gameEnd.value is GameEnd.Success) {
+        _gameEnd.value = null
+        updateHintTypes()
+        _hintList.value = emptyList()
+        return Result.Success(Unit)
+    }
     if (_gameEnd.value != null) {
       onGameEnd()
       coroutineScope.cancel()

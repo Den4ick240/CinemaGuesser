@@ -5,6 +5,7 @@ import android.content.SharedPreferences
 import android.util.Log
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
+import io.ktor.client.plugins.HttpTimeout
 import io.ktor.client.plugins.auth.Auth
 import io.ktor.client.plugins.auth.providers.BearerTokens
 import io.ktor.client.plugins.auth.providers.bearer
@@ -63,6 +64,7 @@ val appModule = module {
         //                url("https://tomcat.csfullstack.com/cinema-guesser-api/api/v1/")
         url("http://10.0.2.2:8080/api/v1/")
       }
+      install(HttpTimeout)
       install(Resources) {}
       install(ContentNegotiation) { json(Json) }
       install(Logging) {

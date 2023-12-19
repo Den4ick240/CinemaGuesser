@@ -3,10 +3,12 @@ package ru.nsu.ccfit.cinemaguesser.game
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.plugins.resources.get
+import io.ktor.client.plugins.timeout
 import io.ktor.client.statement.HttpResponse
 import io.ktor.client.statement.bodyAsText
 import io.ktor.http.HttpStatusCode
 import io.ktor.resources.Resource
+import java.util.concurrent.TimeUnit
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
@@ -57,7 +59,11 @@ class NoConnectionException() : Exception() {}
 
 class GameApi(private val client: HttpClient) {
   suspend fun startGame(difficulty: Difficulty): RoundInfo =
-      checkNoInternet { client.get(GameResource.Start(level = difficulty)) }
+      checkNoInternet {
+            client.get(GameResource.Start(level = difficulty)) {
+              timeout { connectTimeoutMillis  = TimeUnit.MINUTES.toMillis(3) }
+            }
+          }
           .checkAuthorized()
           .body<RoundInfo>()
 
@@ -78,7 +84,10 @@ class GameApi(private val client: HttpClient) {
 
   suspend fun answer(id: Int, answer: String): AnswerResponse =
       checkNoInternet {
-            client.get(GameResource.WithId.Answer(GameResource.WithId(id = id), answer))
+            client.get(GameResource.WithId.Answer(GameResource.WithId(id = id), answer)) {
+              timeout {
+                  connectTimeoutMillis = TimeUnit.MINUTES.toMillis(3) }
+            }
           }
           .checkAuthorized()
           .body<AnswerResponse>()

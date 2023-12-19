@@ -79,6 +79,9 @@ fun GameScreen(game: GameState) {
     }
   }
 
+  if (hintList.isEmpty()) {
+    selectedHint = null
+  }
   if (showDialog || selectedHint == null)
       SelectHint(hintTypes, hintList, game = game, dismiss = { showDialog = false }) {
         selectedHint = it
